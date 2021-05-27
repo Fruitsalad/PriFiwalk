@@ -41,11 +41,11 @@ def gather():
 
 
 def process():
-    db = Database()
+    db = Database(volume_note=args.note)
 
 
 def do_both():
-    db = Database()
+    db = Database(volume_note=args.note)
     system = System(mode='full', target_device=args.device)
     db.store(system)
 
@@ -60,6 +60,9 @@ def parse_args():
     parser.add_argument('--mode',
                         help='Determine the mode of operation.',
                         type=int)
+    parser.add_argument('--note',
+                        help='Add a note to the measured data.',
+                        type=str)
     return parser.parse_args()
 
 

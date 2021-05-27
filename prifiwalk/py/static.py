@@ -32,6 +32,7 @@ sql = {
         fs_seq,fs_nlink, fs_inode) VALUES {};""",
     'file': """({},'{}',{},{},{},{},{},{},{},'{}',{},{},{},{},{},{},{},{},{},{},
         {},{},{},{},{}),""",
+    'store_note': "INSERT INTO VolumeNotes (volume_id, note) VALUES({},'{}')",
     'get_instances': "SELECT start_run FROM Systems",
     'get_hardlink_id': "SELECT max(hardlink_id) FROM Files"
 }
@@ -430,6 +431,19 @@ CREATE TABLE Volumes (
         storage_device_id
     )
     REFERENCES StorageDevices (id),
+    CONSTRAINT unique_id UNIQUE (
+        id
+    )
+);
+
+CREATE TABLE VolumeNotes (
+    id  INTEGER PRIMARY KEY,
+    volume_id INTEGER,
+    note TEXT,
+    CONSTRAINT lnk_Volumes_VolumeNotes FOREIGN KEY (
+        volume_id
+    )
+    REFERENCES Volumes (id),
     CONSTRAINT unique_id UNIQUE (
         id
     )

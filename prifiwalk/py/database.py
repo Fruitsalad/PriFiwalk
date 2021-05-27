@@ -13,12 +13,11 @@ dbfile = os.path.join(os.getcwd(), file)
 
 
 class Database:
-    """docstring for Database"""
-
-    def __init__(self):
+    def __init__(self, volume_note=None):
         self.logger = getLogger(logname)
         self.connection = None
         self.cursor = None
+        self.volume_note = volume_note
 
         if not self.exists():
             self.create()
@@ -62,12 +61,15 @@ class Database:
         return result
 
     def store(self, system):
+        note = self.volume_note
         self.store_system(system)
 
         for device in system.storages:
             self.store_device(device)
             for volume in device.volumes:
                 self.store_volume(volume)
+                if note is not None and note != '':
+                    self.store_volume_note(volume.database_id, note)
 
         self.store_files(system)
 
@@ -127,6 +129,15 @@ class Database:
         self.connection.commit()
         result = self.cursor.fetchone()[0]
         volume.database_id = int(result)
+
+    def store_volume_note(self, volume_id, text):
+        # insert new data
+        statement = sql['store_note']
+        statement = statement.format(
+            volume_id,
+            text)
+        self.cursor.execute(statement)
+        self.connection.commit()
 
     def store_files(self, system):
         count = 0
