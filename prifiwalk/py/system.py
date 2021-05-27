@@ -11,8 +11,9 @@ import time
 class System:
     """docstring for System"""
 
-    def __init__(self, mode):
+    def __init__(self, mode, target_device=None):
         self.mode = mode
+        self.target_device = target_device
         self.operating_system = None
         self.start_measurement = int(time.time())
         self.storages = []
@@ -26,6 +27,18 @@ class System:
     def find_devices(self):
         self.allowed_devs = self.get_allowed_devs()
 
+        # If a target device was specified, only consider that one device
+        target = self.target_device
+
+        if target is not None:
+            print('Target device specified:', target)
+
+            if target not in self.allowed_devs:
+                raise Exception(f"The target device {target} is not accessible.")
+
+            self.allowed_devs = [target]
+
+        # ...
         message(
             "Researching devices: " +
             ", ".join(str(x) for x in self.allowed_devs),

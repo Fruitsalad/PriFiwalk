@@ -6,8 +6,10 @@ from py.database import Database
 from py.system import System
 from sys import exit
 from os import geteuid
+import argparse
 
 
+args = None
 logger = setup_logger(logname, logfile)
 
 
@@ -20,7 +22,7 @@ def menu():
     option = input()
     if option.isnumeric() and int(option) in [1, 2, 3]:
         return int(option)
-    elif option is "q":
+    elif option == "q":
         exit()
 
 
@@ -34,7 +36,7 @@ def run(mode):
 
 
 def gather():
-    system = System(mode='half')
+    system = System(mode='half', target_device=args.device)
     save_object(str(system.start_measurement), system)
 
 
@@ -44,16 +46,31 @@ def process():
 
 def do_both():
     db = Database()
-    system = System(mode='full')
+    system = System(mode='full', target_device=args.device)
     db.store(system)
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--device',
+                        help='The device from which data will be '
+                        'collected. All non-root devices will be '
+                        'processed when this is not specified.',
+                        type=str)
+    parser.add_argument('--mode',
+                        help='Determine the mode of operation.',
+                        type=int)
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
+    args = parse_args()
+
     euid = geteuid()
     if euid != 0:
         print("You are trying to run PriFiwalk with a non-root user!")
         print("Most PriFiwalk functions need root privileges to work.")
         exit()
 
-    mode = menu()
+    mode = args.mode or menu()
     run(mode)
